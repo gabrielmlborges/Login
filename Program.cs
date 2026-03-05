@@ -18,4 +18,23 @@ var app = builder.Build();
 
 app.MapControllers();
 
+// Aplicar migrations automaticamente no início
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<LoginDbContext>();
+        if (context.Database.IsRelational())
+        {
+            context.Database.Migrate();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao rodar as migrations.");
+    }
+}
+
 app.Run();
