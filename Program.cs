@@ -14,8 +14,20 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<String[]>();
+
+builder.Services.AddCors(options => 
+        {
+        options.AddPolicy("MyPolicies", policy => {
+                policy.WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+                });
+        });
+
 var app = builder.Build();
 
+app.UseCors();
 app.MapControllers();
 
 // Aplicar migrations automaticamente no início
